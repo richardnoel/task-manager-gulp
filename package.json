@@ -1,6 +1,6 @@
 {
   "name": "task-manager-gulp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "basic task manager for files and directories",
   "main": "taskManager.js",
   "scripts": {
@@ -27,5 +27,14 @@
     "read-files-promise": "^1.1.1"
   },
   "dependencies": {
+    "copy": "^0.3.1",
+    "copy-dir": "^0.3.0",
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-sass": "^3.1.0",
+    "gutil-color-log": "^1.0.2",
+    "mkdirp": "^0.5.1",
+    "read-files-promise": "^1.1.1"
   }
 }
