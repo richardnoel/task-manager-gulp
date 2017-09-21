@@ -2,12 +2,20 @@ const gulp = require('gulp');
 const log = require('gutil-color-log');
 const readFiles = require('read-files-promise');
 const gulpUtil = require('./gulpUtilFunctions.js');
-//configuración de dirrecciones de modulos
-var pathFilesConfig = '{module}/config/{type}.config.js';
-var pathModule = '{app}/src/main{module}';
-var destiny = '{app}/src/main/webapp2';
 
-var taskManager = function(){
+var taskManager = function(options){
+	var selft = this;
+	if(options.pathModule){
+		this.pathModule = options.pathModule;
+	}else{
+		this.pathModule = '{app}/src/main/{module}';	
+	}
+	if(options.destiny){
+		this.destiny = options.destiny;
+	}else{
+		this.destiny = '{app}/src/main/webapp2';
+	}
+	//this.setOptions(options);
 	this.buildModulesPath = function (mainConfig) {
 		var apps = mainConfig.aplications || {};
 		var filesConfig = mainConfig.filesConfig || [];
@@ -15,8 +23,8 @@ var taskManager = function(){
 		for (var app in apps) {
 			if (apps[app].length) {
 				for (var i = 0; i < apps[app].length; i += 1) {
-					var pathMod = pathModule;
-					var destMod = destiny;
+					var pathMod = this.pathModule;
+					var destMod = this.destiny;
 					var index = apps[app][i].lastIndexOf('/');
 					var nameMod = apps[app][i].substring(index + 1, apps[app][i].length);
 					var listConfig = {};
@@ -46,7 +54,7 @@ var taskManager = function(){
 			log('blue', '--------------' + modules[i].name.toUpperCase() + '--------------');
 			for (var config in configPaths) {
 				try {
-					var configFile = new require(configPaths[config]);
+					var configFile = new require('../../'+configPaths[config]);
 					if (typeof configFile === "function") {
 						var files = configFile(modules[i].source);
 						log('green', configPaths[config] + ' ok!');
@@ -128,4 +136,8 @@ var taskManager = function(){
 			}
 		}
 	};
+}
+
+if (typeof exports !== "undefined") {
+	module.exports = taskManager;
 }

@@ -53,11 +53,11 @@ gulpUtil.prototype.copy = function (settings) {
 			selft.copyFiles(settings.files[i], settings.destinyParent + '/font');
 		}
 	}
+	log('green', settings.destiny + ' copy --> successful task!')
 };
 
 gulpUtil.prototype.copyFiles = function (originfiles, destiny) {
-	gulp.src(originfiles).
-									pipe(gulp.dest(destiny));
+	gulp.src(originfiles).pipe(gulp.dest(destiny));
 };
 
 gulpUtil.prototype.copyDir = function (originDir, destiny) {
