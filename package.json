@@ -1,13 +1,20 @@
 {
-  "name": "taskmanager",
+  "name": "task-manager-gulp",
   "version": "0.0.1",
   "description": "basic task manager for files and directories",
-  "main": "index.js",
+  "main": "taskmanager.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "riyu_slayer",
-  "license": "ISC",
+  "bin": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/richardnoel/task-manager-gulp.git"
+  },
+  "keywords":[],
+  "author": "richardnoel",
+  "license": "MIT",
+  "bugs": {},
   "devDependencies": {
     "copy": "^0.3.1",
     "copy-dir": "^0.3.0",
@@ -18,5 +25,6 @@
     "gutil-color-log": "^1.0.2",
     "mkdirp": "^0.5.1",
     "read-files-promise": "^1.1.1"
-  }
+  },
+  "dependencies": {}
 }
