@@ -9,7 +9,7 @@ Usage
 -----
 
 ```javascript
-//Ejemplo de uso 
+// Use example
 
 const gulp = require('gulp');
 const taskManager = require('task-manager-gulp');
@@ -55,25 +55,10 @@ gulp.task('buildProd', function(){
     },1000);
 });
 
+// CONFIGURATION FILES
 
-// Module address configuration
-/*
-* {app} => main projects 
-* {module} => List of modules that contains the main projects
-*/
-gulp.task('test', function (e) {
-	var gulpManager = new taskManager({
-		pathModule: '{app}/src/main/{module}',
-		destiny: '{app}/src/main/webapp',
-	});
-	var mainConfig = require('./config/aplications.js');
-	var modules = gulpManager.buildModulesPath(mainConfig);
-	gulpManager.readFilesConfig(modules);
-	var settingsList = gulpManager.buildConfig(modules, 'dev', e);
-	gulpManager.executeTasks(settingsList);
-});
+// Required structure file of projects and project modules './config/aplications.js'
 
-// Required structure file of projects and project modules
 "use strict";
 var config = {
 	aplications: {
