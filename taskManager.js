@@ -1,21 +1,25 @@
-const gulp = require('gulp');
 const log = require('gutil-color-log');
-const readFiles = require('read-files-promise');
 const gulpUtil = require('./gulpUtilFunctions.js');
 
-var taskManager = function(options){
-	var selft = this;
-	if(options.pathModule){
+var taskManager = function (options) {
+	this.modes = {
+		develop: 'dev',
+		production: 'prod',
+		default: 'dev'
+	};
+	if (options.pathModule) {
 		this.pathModule = options.pathModule;
-	}else{
-		this.pathModule = '{app}/src/main/{module}';	
+	} else {
+		this.pathModule = '{app}/src/main/{module}';
 	}
-	if(options.destiny){
+	if (options.destiny) {
 		this.destiny = options.destiny;
-	}else{
+	} else {
 		this.destiny = '{app}/src/main/webapp2';
 	}
-	//this.setOptions(options);
+	this.modules = null;
+	this.settingsList = null;
+	this.gUtil = new gulpUtil();
 	this.buildModulesPath = function (mainConfig) {
 		var apps = mainConfig.aplications || {};
 		var filesConfig = mainConfig.filesConfig || [];
@@ -44,19 +48,19 @@ var taskManager = function(options){
 				}
 			}
 		}
-		return modules;
+		this.modules = modules;
 	};
 
-	this.readFilesConfig = function (modules) {
+	this.readFilesConfig = function () {
 		log('blue', 'Init read files');
-		for (var i = 0; i < modules.length; i += 1) {
-			var configPaths = modules[i].configPaths;
-			log('blue', '--------------' + modules[i].name.toUpperCase() + '--------------');
+		for (var i = 0; i < this.modules.length; i += 1) {
+			var configPaths = this.modules[i].configPaths;
+			log('blue', '--------------' + this.modules[i].name.toUpperCase() + '--------------');
 			for (var config in configPaths) {
 				try {
-					var configFile = new require('../../'+configPaths[config]);
-					if (typeof configFile === "function") {
-						var files = configFile(modules[i].source);
+					var configFile = new require('../../' + configPaths[config]);
+					if (typeof configFile === 'function') {
+						var files = configFile(this.modules[i].source);
 						log('green', configPaths[config] + ' ok!');
 						configPaths[config] = files;
 					} else {
@@ -71,7 +75,7 @@ var taskManager = function(options){
 		}
 	};
 
-	this.standardizeSettings = function (config, e) {
+	this.standardizeSettings = function (config) {
 		var confType;
 		var configList = [];
 		for (var confType in config.configPaths) {
@@ -82,14 +86,14 @@ var taskManager = function(options){
 				files: configTask.base,
 				name: configTask.nameBuild || config.name || 'build',
 				destinyParent: config.destinyParent
-			}
+			};
 			settings.destiny = this.renameDest(config, configTask.folderDest);
-			if (confType === "copy") {
+			if (confType === 'copy') {
 				settings.files = {
 					dir: configTask.dir || [],
 					file: configTask.file || [],
 					font: configTask.font || []
-				}
+				};
 			}
 			configList.push(settings);
 		}
@@ -106,38 +110,63 @@ var taskManager = function(options){
 		return currentDest;
 	};
 
-	this.buildConfig = function (modulesConfig) {
+	this.buildConfig = function () {
 		var modulesConf = [];
-		if (modulesConfig) {
-			for (var i = 0; i < modulesConfig.length; i += 1) {
-				var config = modulesConfig[i];
+		if (this.modules) {
+			for (var i = 0; i < this.modules.length; i += 1) {
+				var config = this.modules[i];
 				var settings = this.standardizeSettings(config);
 				modulesConf.push(settings);
 			}
 		}
-		return modulesConf;
+		this.settingsList = modulesConf;
 	};
 
-	this.executeTasks = function (settingsList, mode, e) {
-		if (settingsList.length) {
+	this.setMode = function (mode) {
+		if (this.modes[mode]) {
+			this.mode = this.modes[mode];
+		} else {
+			this.mode = this.modes['default'];
+		}
+	};
+
+	this.executeTasks = function (mode) {
+		this.setMode(mode);
+		if (this.settingsList.length) {
 			log('blue', 'Init execute task');
-			var tasks = new gulpUtil();
-			for (var i = 0; i < settingsList.length; i += 1) {
-				var moduleConfigs = settingsList[i];
+			for (var i = 0; i < this.settingsList.length; i += 1) {
+				var moduleConfigs = this.settingsList[i];
 				if (moduleConfigs[0] && moduleConfigs[0].destiny) {
-					tasks.cleanDirectory(moduleConfigs[0].destiny);
+					this.gUtil.cleanDirectory(moduleConfigs[0].destiny);
 				}
 				for (var j = 0; j < moduleConfigs.length; j += 1) {
 					var setting = moduleConfigs[j];
-					if (tasks.factory['dev'][setting.type]) {
-						tasks.factory['dev'][setting.type](setting, e);
-					}
+					this.gUtil.executeTask(setting, this.mode);
 				}
 			}
 		}
 	};
-}
 
-if (typeof exports !== "undefined") {
+	this.obfuscatorRun = function () {
+		for (var i = 0; i < this.settingsList.length; i += 1) {
+			var moduleConf = this.settingsList[i];
+			for (var j = 0; j < moduleConf.length; j += 1) {
+				var fileConfig = moduleConf[j];
+				if (fileConfig['type'] === 'js') {
+					prodConfig = {
+						file: fileConfig['destiny'] + '/' + fileConfig['name'] + '.' + fileConfig['type'],
+						name: fileConfig['name'],
+						destiny: fileConfig['destiny'],
+						type: fileConfig['type']
+					};
+					var gUtil2 = new gulpUtil();
+					gUtil2.obfuscatorRun(prodConfig, this.mode);
+				}
+			}
+		}
+	};
+};
+
+if (typeof exports !== 'undefined') {
 	module.exports = taskManager;
 }
