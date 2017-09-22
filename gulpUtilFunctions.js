@@ -90,7 +90,7 @@ gulpUtil.prototype.copy = function (settings) {
 				self.copyDir(settings.files[i][j], settings.destiny + nameDir);
 			}
 		}
-		if (i === 'file') {
+		if (i === 'files') {
 			self.copyFiles(settings.files[i], settings.destiny);
 		}
 		if (i === 'font') {
@@ -168,6 +168,13 @@ gulpUtil.prototype.executeProdTask = function (setting, mode) {
 		log('red', setting.type + 'the function not exist!');
 	}
 };
+
+gulpUtil.prototype.fixWatch = function(list, callback){
+	gulp.watch(list, function(){
+		callback();
+	});
+};
+
 
 if (typeof exports !== 'undefined') {
 	module.exports = gulpUtil;

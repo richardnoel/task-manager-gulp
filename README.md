@@ -9,17 +9,62 @@ Usage
 -----
 
 ```javascript
+//Ejemplo de uso 
+
 const gulp = require('gulp');
 const taskManager = require('task-manager-gulp');
-//configuración de dirrecciones de modulos
+const runSeq = require('run-sequence');
+
+var buildMode;
+
+// Creation of the 'gulpManager'
+var gulpManager = new taskManager({
+        pathModule: '{app}/src/main/{module}',
+        destiny: '{app}/src/main/webapp',
+        mode: 'dev',
+        watch: false
+    });
+
+// Configuration construction, importing the main configuration file
+gulp.task('init', function(){
+    var mainConfig = require('./config/aplications.js');
+    gulpManager.buildModulesPath(mainConfig);
+    gulpManager.readFilesConfig();
+    gulpManager.buildConfig();
+});
+
+// Development mode task
+gulp.task('dev', ['init'], function () {
+    if(!buildMode){
+        buildMode = 'develop';
+    }
+    gulpManager.executeTasks(buildMode);
+
+});
+
+// Production mode task
+gulp.task('prod', function(){
+    buildMode = 'production';
+    runSeq(['dev', 'buildProd']);
+});
+
+// Task needed to execute obfuscation
+gulp.task('buildProd', function(){
+    setTimeout(function(){
+        gulpManager.obfuscatorRun();
+    },1000);
+});
+
+
+// Module address configuration
 /*
-* {app} => variable de proyectos principal
-* {module} => Lista de modulos que contiene el proyecto principal 
+* {app} => main projects 
+* {module} => List of modules that contains the main projects
 */
 gulp.task('test', function (e) {
 	var gulpManager = new taskManager({
 		pathModule: '{app}/src/main/{module}',
-		destiny: '{app}/src/main/webapp2',
+		destiny: '{app}/src/main/webapp',
 	});
 	var mainConfig = require('./config/aplications.js');
 	var modules = gulpManager.buildModulesPath(mainConfig);
@@ -28,38 +73,40 @@ gulp.task('test', function (e) {
 	gulpManager.executeTasks(settingsList);
 });
 
-//archivo requerido de  estructura del proyectos y modulos de proyectos 
+// Required structure file of projects and project modules
 "use strict";
 var config = {
 	aplications: {
-		'union-showcase-web' : [
-			'showcase/unikit'
+		'any-web-project' : [
+			'module1/template'
 		],
-		'union-static-web': [
-			'interfaces/unikit',
-			'modules/angular',
-			'modules/bootstrap',
-			'modules/jquery',
-			'templates/default'
+		'any-web-project2': [
+			'module1/custom',
+			'module2/angular',
+			'module3/bootstrap',
+			'module4/jquery'
 		]
 	},
 	filesConfig: {
 		js: '/js.config.js',
 		css: '/css.config.js',
-		copy: '/cp.config.js',
-		doc: '/doc.config.js',
-		json: '/json.config.js'
+		copy: '/cp.config.js'
 	}
 };
 module.exports = config;
 
 
-// configuración de los archivos config.js, que se deben encontrar en cada modulo de cada proyecto  
-// para la configuracion del ejemplo
-// {app}/src/main/{module} --> union-showcase-web/src/main/showcase/unikit
-// {app}/src/main/{module} --> union-static-web/src/main//interfaces/unikit
+// 
+// Creating addresses for reading configuration files.
+// 
+// for project 'any-web-project'
+// {app}/src/main/{module} --> any-web-project/src/main/module1/template
+// ....
+// for project 'any-web-project2'
+// {app}/src/main/{module} --> any-web-project2/src/main/module1/unikit
 
-//archivo js.config.js
+//file required in {app}/src/main/{module}/config/js.config.js, to read javascript file settings
+
 var jsConfig = function(sourcePath){
     var sourcePath = sourcePath || '';
     var files =  {
@@ -77,14 +124,17 @@ if (typeof exports !== "undefined") {
     module.exports = jsConfig;
 }
 
-//archivo css.config.js
+// File required in {app}/src/main/{module}/config/css.config.js, to read css file settings
+// If you have sass files, you can attach them to the same list of base files
+
 var cssConfig = function(sourcePath){
     var sourcePath = sourcePath || '';
     var files =  {
         folderDest: 'angularjs',
         nameBuild: 'build',
         base: [
-            sourcePath + "/file.css"
+            sourcePath + "/file.css",
+            sourcePath + "/file.scss"
         ],
         excludeForProd: []
     }
@@ -95,7 +145,8 @@ if (typeof exports !== "undefined") {
     module.exports = cssConfig;
 }
 
-//archivo cp.config.js
+// File required in {app}/src/main/{module}/config/css.config.js, to read copy file settings
+
 var cpConfig = function(sourcePath){
     var sourcePath = sourcePath || '';
     var files =  {

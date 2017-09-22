@@ -19,6 +19,9 @@ var taskManager = function (options) {
 	}
 	this.modules = null;
 	this.settingsList = null;
+	this.watch = options.watch || false;
+	this.runningWatch = false;
+	this.listWatch = [];
 	this.gUtil = new gulpUtil();
 	this.buildModulesPath = function (mainConfig) {
 		var apps = mainConfig.aplications || {};
@@ -91,7 +94,7 @@ var taskManager = function (options) {
 			if (confType === 'copy') {
 				settings.files = {
 					dir: configTask.dir || [],
-					file: configTask.file || [],
+					files: configTask.files || [],
 					font: configTask.font || []
 				};
 			}
@@ -131,6 +134,7 @@ var taskManager = function (options) {
 	};
 
 	this.executeTasks = function (mode) {
+		var that = this;
 		this.setMode(mode);
 		if (this.settingsList.length) {
 			log('blue', 'Init execute task');
@@ -141,10 +145,48 @@ var taskManager = function (options) {
 				}
 				for (var j = 0; j < moduleConfigs.length; j += 1) {
 					var setting = moduleConfigs[j];
+					if(this.watch){
+						var list = this.createListToWath(setting);
+						this.listWatch = this.listWatch.concat(list);
+					}
 					this.gUtil.executeTask(setting, this.mode);
 				}
 			}
 		}
+		if(this.watch && !this.runningWatch){
+			this.runWatch();	
+		}
+	};
+
+	this.runWatch = function(){
+		var that = this;
+		this.runningWatch = true;
+		this.gUtil.fixWatch(this.listWatch, function(){
+			that.executeTasks(this.mode);
+		});
+	};
+
+	this.createListToWath = function(setting){
+		var listFiles = [];
+		if (setting.type === 'js' || setting.type === 'css'){
+			listFiles = listFiles.concat(setting.files);
+		} else if (setting.type === 'copy'){
+			for( var item in setting.files){
+				if(item === 'dir'){
+					var folders = setting.files[item];
+					var auxListFolders = [];
+					for(var k = 0; k < folders.length; k+=1){
+						var folder = folders[k];
+						folder = folder + '/**/*.*';
+						auxListFolders.push(folder);
+					}
+					listFiles = listFiles.concat(auxListFolders);
+				}else{
+					listFiles = listFiles.concat(setting.files[item]);
+				}
+			}
+		}
+		return listFiles;
 	};
 
 	this.obfuscatorRun = function () {
