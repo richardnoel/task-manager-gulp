@@ -18,41 +18,36 @@ const runSeq = require('run-sequence');
 var buildMode;
 
 // Creation of the 'gulpManager'
-var gulpManager = new taskManager({
-        pathModule: '{app}/src/main/{module}',
-        destiny: '{app}/src/main/webapp',
-        mode: 'dev',
-        watch: false
-    });
-
 // Configuration construction, importing the main configuration file
-gulp.task('init', function(){
-    var mainConfig = require('./config/aplications.js');
-    gulpManager.buildModulesPath(mainConfig);
-    gulpManager.readFilesConfig();
-    gulpManager.buildConfig();
+var createGulpManager = function (mode, observable) {
+	gulpManager = new taskManager({
+		pathModule: "{app}/src/main/{module}",
+		destiny: "{app}/src/main/webapp",
+		mode: mode || "dev",
+		watch: observable || false
+	});
+	
+	var mainConfig = require("./config/config.js");
+	gulpManager.buildModulesPath(mainConfig);
+	gulpManager.readFilesConfig();
+	gulpManager.buildConfig();
+};
+
+gulp.task("dev", function () {
+	createGulpManager("develop", false);
+	gulpManager.executeTasks("develop");
 });
 
-// Development mode task
-gulp.task('dev', ['init'], function () {
-    if(!buildMode){
-        buildMode = 'develop';
-    }
-    gulpManager.executeTasks(buildMode);
 
+gulp.task('prod', function () {
+	runSeq(['dev', 'buildProd']);
 });
 
-// Production mode task
-gulp.task('prod', function(){
-    buildMode = 'production';
-    runSeq(['dev', 'buildProd']);
-});
 
-// Task needed to execute obfuscation
-gulp.task('buildProd', function(){
-    setTimeout(function(){
-        gulpManager.obfuscatorRun();
-    },1000);
+gulp.task('buildProd', function () {
+	setTimeout(function () {
+		gulpManager.obfuscatorRun();
+	}, 3000);
 });
 
 // CONFIGURATION FILES
