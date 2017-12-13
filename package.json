@@ -1,6 +1,6 @@
 {
   "name": "task-manager-gulp",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "basic task manager for files and directories",
   "main": "taskManager.js",
   "scripts": {
