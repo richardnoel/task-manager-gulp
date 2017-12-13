@@ -54,6 +54,20 @@ var taskManager = function (options) {
 		this.modules = modules;
 	};
 
+	this.fixAbsolutePath = function (files, target) {
+		for (var item in files) {
+			if (typeof files[item] === "object" && files[item].length) {
+				var itemFile = files[item];
+				for (var index = 0; index < itemFile.length; index += 1) {
+					var file = itemFile[index];
+					if (file.indexOf(target) === -1) {
+						itemFile[index] = target + itemFile[index];
+					}
+				}
+			}
+		}
+	};
+
 	this.readFilesConfig = function () {
 		log('blue', 'Init read files');
 		for (var i = 0; i < this.modules.length; i += 1) {
@@ -64,6 +78,7 @@ var taskManager = function (options) {
 					var configFile = new require('../../' + configPaths[config]);
 					if (typeof configFile === 'function') {
 						var files = configFile(this.modules[i].source);
+						this.fixAbsolutePath(files, this.modules[i].source);
 						log('green', configPaths[config] + ' ok!');
 						configPaths[config] = files;
 					} else {
@@ -145,7 +160,7 @@ var taskManager = function (options) {
 				}
 				for (var j = 0; j < moduleConfigs.length; j += 1) {
 					var setting = moduleConfigs[j];
-					if(this.watch){
+					if (this.watch) {
 						var list = this.createListToWath(setting);
 						this.listWatch = this.listWatch.concat(list);
 					}
@@ -153,35 +168,35 @@ var taskManager = function (options) {
 				}
 			}
 		}
-		if(this.watch && !this.runningWatch){
-			this.runWatch();	
+		if (this.watch && !this.runningWatch) {
+			this.runWatch();
 		}
 	};
 
-	this.runWatch = function(){
+	this.runWatch = function () {
 		var that = this;
 		this.runningWatch = true;
-		this.gUtil.fixWatch(this.listWatch, function(){
+		this.gUtil.fixWatch(this.listWatch, function () {
 			that.executeTasks(this.mode);
 		});
 	};
 
-	this.createListToWath = function(setting){
+	this.createListToWath = function (setting) {
 		var listFiles = [];
-		if (setting.type === 'js' || setting.type === 'css'){
+		if (setting.type === 'js' || setting.type === 'css') {
 			listFiles = listFiles.concat(setting.files);
-		} else if (setting.type === 'copy'){
-			for( var item in setting.files){
-				if(item === 'dir'){
+		} else if (setting.type === 'copy') {
+			for (var item in setting.files) {
+				if (item === 'dir') {
 					var folders = setting.files[item];
 					var auxListFolders = [];
-					for(var k = 0; k < folders.length; k+=1){
+					for (var k = 0; k < folders.length; k += 1) {
 						var folder = folders[k];
 						folder = folder + '/**/*.*';
 						auxListFolders.push(folder);
 					}
 					listFiles = listFiles.concat(auxListFolders);
-				}else{
+				} else {
 					listFiles = listFiles.concat(setting.files[item]);
 				}
 			}
