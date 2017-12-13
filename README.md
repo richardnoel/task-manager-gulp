@@ -92,13 +92,12 @@ module.exports = config;
 
 //file required in {app}/src/main/{module}/config/js.config.js, to read javascript file settings
 
-var jsConfig = function(sourcePath){
-    var sourcePath = sourcePath || '';
+var jsConfig = function(){
     var files =  {
         folderDest: 'angularjs',
         nameBuild: 'build',
         base: [
-            sourcePath + "/file.js"
+            "/file.js"
         ],
         excludeToProd: []
     }
@@ -112,14 +111,13 @@ if (typeof exports !== "undefined") {
 // File required in {app}/src/main/{module}/config/css.config.js, to read css file settings
 // If you have sass files, you can attach them to the same list of base files
 
-var cssConfig = function(sourcePath){
-    var sourcePath = sourcePath || '';
+var cssConfig = function(){
     var files =  {
         folderDest: 'angularjs',
         nameBuild: 'build',
         base: [
-            sourcePath + "/file.css",
-            sourcePath + "/file.scss"
+            "/file.css",
+            "/file.scss"
         ],
         excludeForProd: []
     }
@@ -132,8 +130,7 @@ if (typeof exports !== "undefined") {
 
 // File required in {app}/src/main/{module}/config/css.config.js, to read copy file settings
 
-var cpConfig = function(sourcePath){
-    var sourcePath = sourcePath || '';
+var cpConfig = function(){
     var files =  {
 		folderDest: 'angularjs',
         nameBuild: 'build',
@@ -141,8 +138,8 @@ var cpConfig = function(sourcePath){
             sourcePath + "/dir/"  
         ],
         files:[
-        	sourcePath + '/templates/test.html',
-        	sourcePath + '/3.3.7/fonts/*'
+        	'/templates/test.html',
+        	'/3.3.7/fonts/*'
         ]
     }
     return files;
