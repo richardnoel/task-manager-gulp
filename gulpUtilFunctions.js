@@ -76,10 +76,10 @@ gulpUtil.prototype.obfuscatorRun = function (settings) {
 											.pipe(minifyCSS())
 											.pipe(sourcemaps.write('/'))
 											.pipe(gulp.dest(settings.destiny));
+			log('green', settings.destiny + '---> Obfusator css completed!!');
 		}
 	} else {
-		console.log(settings.file);
-		console.log('---!!!!!!no existe');
+		log('yellow', 'The file not exist!');
 	}
 };
 
