@@ -209,7 +209,7 @@ var taskManager = function (options) {
 			var moduleConf = this.settingsList[i];
 			for (var j = 0; j < moduleConf.length; j += 1) {
 				var fileConfig = moduleConf[j];
-				if (fileConfig['type'] === 'js') {
+				if (fileConfig['type'] === 'js' || fileConfig['type'] === 'css') {
 					prodConfig = {
 						file: fileConfig['destiny'] + '/' + fileConfig['name'] + '.' + fileConfig['type'],
 						name: fileConfig['name'],
@@ -217,7 +217,7 @@ var taskManager = function (options) {
 						type: fileConfig['type']
 					};
 					var gUtil2 = new gulpUtil();
-					gUtil2.obfuscatorRun(prodConfig, this.mode);
+					gUtil2.obfuscatorRun(prodConfig, 'prod');
 				}
 			}
 		}

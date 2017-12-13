@@ -38,35 +38,47 @@ gulpUtil.prototype.jsDev = function (settings) {
 
 gulpUtil.prototype.obfuscatorRun = function (settings) {
 	if (fs.existsSync(settings.file)) {
-		read(settings.file, {encoding: 'utf8'}, function (err, buffer) {
-			log('green', settings.file);
-			var configObfusator = {
-				compact: true,
-				sourceMap: true,
-				sourceMapMode: 'separate',
-				disableConsoleOutput: true,
-				mangle: true,
-				log: true,
-				rotateStringArray: true,
-				selfDefending: true,
-				stringArray: true,
-				stringArrayThreshold: 0.75
-			};
-			var obfuscationResult = javaScriptObfuscator.obfuscate(buffer, configObfusator);
-			writeFile.promise(settings.file, obfuscationResult.getObfuscatedCode()).then(function () {
-				log('green', settings.destiny + '---> Obfuscation completed!!');
+		if (settings.type === "js") {
+			read(settings.file, {encoding: 'utf8'}, function (err, buffer) {
+				log('green', settings.file);
+				var configObfusator = {
+					compact: true,
+					sourceMap: true,
+					sourceMapMode: 'separate',
+					disableConsoleOutput: true,
+					mangle: true,
+					log: true,
+					rotateStringArray: true,
+					selfDefending: true,
+					stringArray: true,
+					stringArrayThreshold: 0.75
+				};
+				var obfuscationResult = javaScriptObfuscator.obfuscate(buffer, configObfusator);
+				writeFile.promise(settings.file, obfuscationResult.getObfuscatedCode()).then(function () {
+					log('green', settings.destiny + '---> Obfuscation completed!!');
+				});
+				fs.open(settings.destiny + '/' + settings.name + '.js.map', 'wx', (err, fd) => {
+					if (err) {
+						console.log(err);
+					}
+					writeFile.promise(settings.destiny + '/' + settings.name + '.js.map', obfuscationResult.getSourceMap())
+													.then(function () {
+														log('green', settings.destiny + '---> sourcemaps completed!!');
+													});
+				});
 			});
-			fs.open(settings.destiny + '/' + settings.name + '.js.map', 'wx', (err, fd) => {
-				if (err) {
-					console.log(err);
-				}
-				writeFile.promise(settings.destiny + '/' + settings.name + '.js.map', obfuscationResult.getSourceMap())
-												.then(function () {
-													log('green', settings.destiny + '---> sourcemaps completed!!');
-												});
-			});
-		});
+		}
+		if (settings.type === "css") {
+			gulp.src(settings.file)
+											.pipe(concat(settings.name + '.css'))
+											.pipe(sourcemaps.init())
+											.pipe(sourcemaps.init({loadMaps: true}))
+											.pipe(minifyCSS())
+											.pipe(sourcemaps.write('/'))
+											.pipe(gulp.dest(settings.destiny));
+		}
 	} else {
+		console.log(settings.file);
 		console.log('---!!!!!!no existe');
 	}
 };
@@ -169,8 +181,8 @@ gulpUtil.prototype.executeProdTask = function (setting, mode) {
 	}
 };
 
-gulpUtil.prototype.fixWatch = function(list, callback){
-	gulp.watch(list, function(){
+gulpUtil.prototype.fixWatch = function (list, callback) {
+	gulp.watch(list, function () {
 		callback();
 	});
 };
