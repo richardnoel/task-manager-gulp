@@ -17,6 +17,7 @@ var taskManager = function (options) {
 	} else {
 		this.destiny = '{app}/src/main/webapp2';
 	}
+	this.timeOutToWatch = options.timeOutToWatch || 3000;
 	this.modules = null;
 	this.settingsList = null;
 	this.watch = options.watch || false;
@@ -169,7 +170,9 @@ var taskManager = function (options) {
 			}
 		}
 		if (this.watch && !this.runningWatch) {
-			this.runWatch();
+			setTimeout(function () {
+				that.runWatch();
+			}, that.timeOutToWatch);
 		}
 	};
 
