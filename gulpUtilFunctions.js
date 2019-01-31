@@ -2,7 +2,6 @@
 const gulp = require('gulp');
 const concat = require('gulp-concat');
 const log = require('gutil-color-log');
-const copy = require('copy');
 const copydir = require('copy-dir');
 const sass = require('gulp-sass');
 const del = require('del');
